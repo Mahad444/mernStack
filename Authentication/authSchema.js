@@ -7,10 +7,5 @@ const authSchema = joi.object({
     password:joi.string().min(6).required(),
     phoneNumber:joi.string().min(10).required()
 });
-const choiceSchema =joi.object({
-    foodType: joi.string().required(),
-    quantity: joi.string().required(),
-    drinkType:joi.string().required()
-})
 
-module.exports = authSchema , choiceSchema;
+module.exports = authSchema;
