@@ -12,7 +12,7 @@ app.listen(7500,()=>{
     console.log("listening to http://localhost:7500")
 })
 
-app.use(routes)
+app.use(routes);
 
 
 
