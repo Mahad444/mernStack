@@ -24,12 +24,12 @@ const waiterSchema =  new Schema({
 //         next(error)
 //     }
 // })
-// waiterSchema.methods.isValidPass = async function(pass) {
-//     try{
-//     return await bycrypt.compare(pass,this.pass)
-//     }catch(error){
-//         throw error;
-//     }
-// }
+waiterSchema.method.isValidPass = async (pass) => {
+    try{
+    return await bycrypt.compare(pass,this.pass)
+    }catch(error){
+        throw error;
+    }
+}
 
 module.exports = mongoose.model("waiter", waiterSchema);

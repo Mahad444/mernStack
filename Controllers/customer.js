@@ -4,7 +4,7 @@ const auths = require('../Authentication/authSchema');
 const creatError = require('http-errors');
 const choice = require("../Authentication/choiceSchema");
 const waiterauth  = require('../Authentication/waiterSchema');
-const waiters = require("../Model/waiter");
+const Waiter = require("../Model/waiter"); 
 
 module.exports ={
     customer:async (req,res,next)=>{
@@ -57,11 +57,11 @@ try{
 
         const {pass,Name} = await waiterauth.validateAsync(req.body);
         // Existance of the Waiter in the System by pass
-        const exists = await waiters.findOne({pass:pass})
+        const exists = await Waiter.findOne({pass:pass})
         if (exists) throw creatError.Conflict(`${pass} exists Already`);
 
 
-        await waiters.create({pass:pass,Name:Name}).then(waiters =>{
+        await Waiter.create({pass:pass,Name:Name}).then(waiters =>{
             res.send(waiters)
         })
 
@@ -75,13 +75,13 @@ try{
         try{
         const {pass,Name} = await waiterauth.validateAsync(req.body);
 
-        const user = await waiters.findOne({pass:pass,Name:Name })
-        if(!user) throw creatError.NotFound("User not Registered")
+        const user = await Waiter.findOne({pass:pass,Name:Name})
+        if(!user) throw creatError.NotFound (`User not Registered`)
 
-        const matching = await user.$isValid[Name.Name,pass.pass]
+        const matching = [user.Name, user.pass]
         if(!matching) throw Error("UserName or Password is invalid")
 
-        //  const success = await (user.id)
+         const success = await (user.id)
  
          res.send("Logged in Successfully")
         }catch(error){
