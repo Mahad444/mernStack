@@ -5,7 +5,7 @@ const creatError = require('http-errors');
 const choice = require("../Authentication/choiceSchema");
 const waiterauth  = require('../Authentication/waiterSchema');
 const Waiter = require("../Model/waiter"); 
-const { findOne } = require('../Model/waiter');
+const bycrypt = require('bcrypt')
 
 module.exports ={
     customer:async (req,res,next)=>{
@@ -31,12 +31,19 @@ module.exports ={
     },
     login:async(req,res,next)=>{
         try{
-            const {email,phoneNumber,password} = await auths.validateAsync(req.body)
+            const {email,password} = req.body;
             
-            const exists = customer.findOne({email:email,phoneNumber,password:password})
+            const exists = customer.findOne({email:email});
+            if (!exists) throw creatError.NotFound("User Not Registered") 
+
+            const match = await customer.isValidPassword(password)
+            if (!match) throw Error ("Invalid email or Password")
+             
+            res.send("logged in successfully");
 
         }catch(err){
-            next(err)
+            next(err.isjoi===true)
+            return (Error("invalid email or password"))
         }
 
     },
@@ -74,6 +81,7 @@ try{
 
  
     const waiterr  = new Waiter({pass,Name})
+  
      
     const savedUser = waiterr.save(); 
 
@@ -92,10 +100,11 @@ try{
         try{
         const {pass,Name} = await waiterauth.validateAsync(req.body);
 
-        const user = await Waiter.findOne({pass:pass}) 
+        const user = await Waiter.findOne({Name:Name}) 
         if(!user) throw creatError.NotFound (`User not Registered`)
 
-        const matching = [user.Name]
+        const matching =  await bycrypt.compare(pass,user.pass)
+
         if(!matching) throw Error("UserName or Password is invalid")
 
          const success = await (user.id)

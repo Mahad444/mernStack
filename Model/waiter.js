@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const bycrypt = require("bcrypt");
 
-const Schema = mongoose.Schema
 
 const waiterSchema =  new Schema({
     pass:{
@@ -13,23 +13,18 @@ const waiterSchema =  new Schema({
         required:[true,"Name is Required"]
     }
 });
-// waiterSchema.pre('save',async (next)=>{
-//     try{
-//         const salt = await bycrypt.genSalt(10);
-//         const hashedPass = await bycrypt.hash(this.pass, salt)
-//         this.pass = hashedPass;
-//         next();
-
-//     }catch(error){
-//         next(error)
-//     }
-// })
-waiterSchema.method.isValidPass = async (pass) => {
+waiterSchema.pre('save',async function (next){
     try{
-    return await bycrypt.compare(pass,this.pass)
+        const salt = await bycrypt.genSalt(10);
+        
+        const hashedPass = await bycrypt.hash(this.pass,salt)
+            this.pass = hashedPass; 
+        next();
+
     }catch(error){
-        throw error;
+        next(error)
     }
-}
+})
+
 
 module.exports = mongoose.model("waiter", waiterSchema);
