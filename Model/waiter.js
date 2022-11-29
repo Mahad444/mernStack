@@ -24,6 +24,10 @@ waiterSchema.pre('save',async function (next){
     }catch(error){
         next(error)
     }
+    
+    // const matchpas = await bycrypt.compare(pass,Waiter.pass)
+    //     if (matchpas) throw Error("User exists Already")
+
 })
 
 
