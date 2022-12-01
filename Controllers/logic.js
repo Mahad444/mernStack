@@ -7,6 +7,7 @@ const waiterauth  = require('../Authentication/waiterSchema');
 const Waiter = require("../Model/waiter"); 
 const bycrypt = require('bcrypt');
 
+
 module.exports ={
     customer:async (req,res,next)=>{
         try{
@@ -74,24 +75,25 @@ try{
     access:async(req,res,next)=>{ 
         try{
 
-        const {pass,Name} = await waiterauth.validateAsync(req.body);
-
-        
-        // Existance of the Waiter in the System by pass
-        const exists = await Waiter.findOne({Name:Name});
-        if (exists) throw creatError.Conflict(`${pass} exists Already`);
+        const {pass,Name} = await waiterauth.validateAsync(req.body)
  
         
-    const waiterr  = new Waiter({pass,Name})     
-    const savedUser = waiterr.save(); 
+        // Existance of the Waiter in the System by pass
+        const exists = await Waiter.findOne({Name:Name}); 
+        const matching = bycrypt.compare (Name) 
+        if(matching === exists.pass) throw Error (`${pass} exists Already`)
+    
+         
+         const waiterr  = new Waiter.create({pass:pass,Name:Name}).then(waiterr =>{
 
+         const savedUser = waiterr.save(); 
 
-        // await Waiter.create({pass:pass,Name:Name}).then(waiters =>{
-            res.send({savedUser})
-        // })
+            res.send(savedUser);
+         })   
+
 
         }catch(err){
-            next(err)
+                next(err)
         }
     },
     // waiter when logging in
@@ -103,6 +105,7 @@ try{
         const user = await Waiter.findOne({Name:Name}) 
         if(!user) throw creatError.NotFound (`User not Registered`)
 
+    
         const matching =  await bycrypt.compare(pass,user.pass)
 
         if(!matching) throw Error("UserName or Password is invalid")
