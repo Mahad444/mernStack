@@ -4,9 +4,13 @@ const bycrypt = require("bcrypt");
 
 
 const waiterSchema =  new Schema({
+    secret:{
+        type:String,
+        required:[true, "Secret is required"]
+    },
     pass:{
         type:String,
-        required:[true, "Pass is required"]
+        required:[true,"Pass is Required"]
     },
     Name:{
         type:String,
@@ -17,8 +21,8 @@ waiterSchema.pre('save',async function (next){
     try{
         const salt = await bycrypt.genSalt(10);
         
-        const hashedPass = await bycrypt.hash(this.pass,salt)
-            this.pass = hashedPass; 
+        const hashedPass = await bycrypt.hash(this.secret,salt)
+            this.secret = hashedPass; 
         next();
 
     }catch(error){
