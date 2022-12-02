@@ -75,21 +75,18 @@ try{
     access:async(req,res,next)=>{ 
         try{
 
-        const {pass,Name} = await waiterauth.validateAsync(req.body)
+        const {pass,secret,Name} = await waiterauth.validateAsync(req.body)
  
-        
         // Existance of the Waiter in the System by pass
-        const exists = await Waiter.findOne({Name:Name}); 
-        const matching = bycrypt.compare (Name) 
-        if(matching === exists.pass) throw Error (`${pass} exists Already`)
-    
+        const exists = await Waiter.findOne({pass:pass}) 
+        if( exists) throw Error (`${pass} exists Already`) 
+        if(pass === secret) throw Error ("Pass Cannot be The Password")
          
-         const waiterr  = new Waiter.create({pass:pass,Name:Name}).then(waiterr =>{
+         const waiterr  = new Waiter({secret:secret,pass:pass,Name:Name})
 
          const savedUser = waiterr.save(); 
 
-            res.send(savedUser);
-         })   
+            res.send(savedUser); 
 
 
         }catch(err){
@@ -100,13 +97,13 @@ try{
 
     grant:async(req,res,next)=>{
         try{
-        const {pass,Name} = await waiterauth.validateAsync(req.body);
+        const {secret,pass} = await waiterauth.validateAsync(req.body);
 
-        const user = await Waiter.findOne({Name:Name}) 
+        const user = await Waiter.findOne({pass:pass}) 
         if(!user) throw creatError.NotFound (`User not Registered`)
 
     
-        const matching =  await bycrypt.compare(pass,user.pass)
+        const matching =  await bycrypt.compare(secret,user.secret)
 
         if(!matching) throw Error("UserName or Password is invalid")
 
