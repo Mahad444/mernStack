@@ -1,6 +1,6 @@
-const customer = require('../Model/customer');
+const Customer = require('../Model/customer');
 const menu = require('../Model/menu');
-const auths = require('../Authentication/authSchema');
+const customerauths = require('../Authentication/authSchema');
 const creatError = require('http-errors');
 const choice = require("../Authentication/choiceSchema");
 const waiterauth  = require('../Authentication/waiterSchema');
@@ -11,16 +11,16 @@ const bycrypt = require('bcrypt');
 module.exports ={
     customer:async (req,res,next)=>{
         try{
-        const {firstName,lastName,email,password,phoneNumber} =  await auths.validateAsync(req.body);
+        const {firstName,lastName,email,password,phoneNumber} =  await customerauths.validateAsync(req.body);
 
-         const exists = await customer.findOne({email:email})
-         const exist = await customer.findOne({phoneNumber:phoneNumber})
+         const exists = await Customer.findOne({email:email})
+         const exist = await Customer.findOne({phoneNumber:phoneNumber})
 
          if (exists) throw creatError.Conflict(`${email} has already been registered`) ;
          if (exist) throw creatError.Conflict (`${phoneNumber} has been registered`);
 
 
-         const user = new customer({email,password,phoneNumber,firstName,lastName});
+         const user = new Customer({email,password,phoneNumber,firstName,lastName});
 
         const savedUser = user.save();
 
@@ -30,24 +30,28 @@ module.exports ={
                 next(err);
                  }
     },
-    login:async(req,res,next)=>{
+
+    login:async (req,res,next)=>{
         try{
             const {email,password} = req.body;
             
-            const exists = customer.findOne({email:email});
-            if (!exists) throw creatError.NotFound("User Not Registered") 
+            const exists = await Customer.findOne({email:email});
 
-            const match = await bycrypt.compare(password,customer.password)
+            if (!exists) throw Error ("User Not Registered") 
+
+            const match = await  bycrypt.compare(password,exists.password);
+
             if (!match) throw Error ("Invalid email or Password")
              
-            res.send("logged in successfully");
+            res.send("logged in successfully")
 
         }catch(err){
             next(err.isjoi===true)
-            return (Error("invalid email or password"))
+            return (Error("invalid email or password")) 
         }
 
     },
+
     menu:async(req,res)=>{
         try{
 
@@ -80,6 +84,9 @@ try{
         // Existance of the Waiter in the System by pass
         const exists = await Waiter.findOne({pass:pass}) 
         if( exists) throw Error (`${pass} exists Already`) 
+
+        // Validating of waiters,the pass cannot be password 
+
         if(pass === secret) throw Error ("Pass Cannot be The Password")
          
          const waiterr  = new Waiter({secret:secret,pass:pass,Name:Name})
@@ -97,7 +104,7 @@ try{
 
     grant:async(req,res,next)=>{
         try{
-        const {secret,pass} = await waiterauth.validateAsync(req.body);
+        const {secret,pass} = req.body;
 
         const user = await Waiter.findOne({pass:pass}) 
         if(!user) throw creatError.NotFound (`User not Registered`)
