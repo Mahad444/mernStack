@@ -6,6 +6,7 @@ const choice = require("../Authentication/choiceSchema");
 const waiterauth  = require('../Authentication/waiterSchema');
 const Waiter = require("../Model/waiter"); 
 const bycrypt = require('bcrypt');
+const {signAccessToken }= require('../Authentication/jwthelper')
 
 
 module.exports ={
@@ -24,7 +25,9 @@ module.exports ={
 
         const savedUser = user.save();
 
-            res.send(savedUser)
+        const accessToken = await signAccessToken (savedUser.id)
+
+            res.send({accessToken})
         }
             catch(err){
                 next(err);
@@ -93,7 +96,8 @@ try{
 
          const savedUser = waiterr.save(); 
 
-            res.send(savedUser); 
+         const accessToken = await signAccessToken(savedUser.id)
+            res.send({accessToken}); 
 
 
         }catch(err){
