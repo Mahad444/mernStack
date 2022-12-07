@@ -6,7 +6,7 @@ const choice = require("../Authentication/choiceSchema");
 const waiterauth  = require('../Authentication/waiterSchema');
 const Waiter = require("../Model/waiter"); 
 const bycrypt = require('bcrypt');
-const {signAccessToken }= require('../Authentication/jwthelper')
+const {signAccessToken,signRefreshToken}= require('../Authentication/jwthelper')
 
 
 module.exports ={
@@ -86,7 +86,7 @@ try{
  
         // Existance of the Waiter in the System by pass
         const exists = await Waiter.findOne({pass:pass}) 
-        if( exists) throw Error (`${pass} exists Already`) 
+        if( exists) throw Error (`${pass} exists Already`)  
 
         // Validating of waiters,the pass cannot be password 
 
@@ -118,9 +118,10 @@ try{
 
         if(!matching) throw Error("UserName or Password is invalid")
 
-         const success = await (user.id)
+         const successToken = await signAccessToken(user.id)
+         const refreshToken = await signRefreshToken(user.id)
  
-         res.send("Logged in Successfully")
+         res.send({successToken,refreshToken})
         }catch(error){
             if(error.isJoi===true)
         return next (creatError.BadRequest("Invalid Username or Password"))
