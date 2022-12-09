@@ -33,5 +33,21 @@ module.exports ={
                 resolve(token);
             })
         })
-    }
+    },
+    
+    //  Middleware to verify token
+verifyAccesToken:(req,res,next)=>{
+    if (!req.headers["authorization"])
+    return next (creatError.Unauthorized());
+    const authHeader = req.headers["authorization"];
+    const bearerToken =authHeader.split(' ');
+    const token = bearerToken[1];
+    JWT.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,payload)=>{
+        if(err){
+            return next(creatError.Unauthorized("Unauthorized User"))
+        }
+        req.payload = payload;
+        next()
+    })
+}
 }
