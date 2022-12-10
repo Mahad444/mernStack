@@ -47,7 +47,7 @@ verifyAccesToken:(req,res,next)=>{
             return next(creatError.Unauthorized("Unauthorized User"))
         }
         req.payload = payload;
-        next()
+        next() 
     })
-}
+} 
 }
