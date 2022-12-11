@@ -45,8 +45,10 @@ module.exports ={
             const match = await  bycrypt.compare(password,exists.password);
 
             if (!match) throw Error ("Invalid email or Password")
+
+            const accessToken = await signAccessToken(exists.id)
              
-            res.send("logged in successfully")
+            res.send({accessToken})
 
         }catch(err){
             next(err.isjoi===true)
@@ -55,7 +57,7 @@ module.exports ={
 
     },
 
-    menu:async(req,res)=>{
+    menu:async(req,res,next)=>{
         try{
 
             const {foodType,quantity,drinkType} = await choice.validateAsync(req.body);
@@ -74,7 +76,7 @@ try{
     await menu.find({}).then(menu=>{
         res.send(menu)
     })
-}catch(err){
+}catch(err){ 
     next(err)
 }
     },
